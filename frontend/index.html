@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ExamPrep AI</title>
+  <!-- Main Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <h2 class="sr-only">ExamPrep AI — AI-powered exam preparation platform with chat, quizzes, flashcards, summaries, and analytics</h2>
+  
+  <div id="root"></div>
+
+  <!-- Entry JavaScript Module -->
+  <script type="module">
+    import { navigate } from './js/state.js';
+    import { render } from './js/router.js';
+
+    // Expose navigate globally so inline HTML onclick triggers can route views
+    window.navigate = navigate;
+
+    // Boot the application
+    render();
+  </script>
+</body>
+</html>
