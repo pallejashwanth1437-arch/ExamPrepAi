@@ -96,9 +96,17 @@ const UserModel = mongoose.models.User || mongoose.model('User', userSchema);
 
 // Local User database fallback helper
 const USERS_FILE = path.join(UPLOADS_DIR, 'users.json');
+let localUsersMemoryCache = [];
 function readUsersDB() {
+  if (process.env.VERCEL) {
+    return localUsersMemoryCache;
+  }
   if (!fs.existsSync(USERS_FILE)) {
-    fs.writeFileSync(USERS_FILE, JSON.stringify([]));
+    try {
+      fs.writeFileSync(USERS_FILE, JSON.stringify([]));
+    } catch (err) {
+      console.warn("Could not write users file to disk:", err.message);
+    }
     return [];
   }
   try {
@@ -110,6 +118,10 @@ function readUsersDB() {
 }
 
 function writeUsersDB(data) {
+  if (process.env.VERCEL) {
+    localUsersMemoryCache = data;
+    return;
+  }
   try {
     fs.writeFileSync(USERS_FILE, JSON.stringify(data, null, 2));
   } catch (err) {
@@ -157,9 +169,17 @@ async function incrementUserAnalytic(email, field, incrementVal = 1) {
   }
 }
 
+let localDocsMemoryCache = [];
 function readDB() {
+  if (process.env.VERCEL) {
+    return localDocsMemoryCache;
+  }
   if (!fs.existsSync(DB_FILE)) {
-    fs.writeFileSync(DB_FILE, JSON.stringify([]));
+    try {
+      fs.writeFileSync(DB_FILE, JSON.stringify([]));
+    } catch (err) {
+      console.warn("Could not write db file to disk:", err.message);
+    }
     return [];
   }
   try {
@@ -171,6 +191,10 @@ function readDB() {
 }
 
 function writeDB(data) {
+  if (process.env.VERCEL) {
+    localDocsMemoryCache = data;
+    return;
+  }
   try {
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
   } catch (err) {
