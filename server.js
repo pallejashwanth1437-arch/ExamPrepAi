@@ -8,6 +8,7 @@ import pdf from 'pdf-parse';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { fileURLToPath } from 'url';
 import crypto from 'crypto';
+import mongoose from 'mongoose';
 
 // Load environment variables
 dotenv.config();
@@ -35,8 +36,6 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Database helper
-import mongoose from 'mongoose';
-
 const DB_FILE = path.join(UPLOADS_DIR, 'db.json');
 let isMongoConnected = false;
 
