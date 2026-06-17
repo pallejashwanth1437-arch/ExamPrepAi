@@ -653,6 +653,71 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+// Google Auth Config
+app.get('/api/auth/config', (req, res) => {
+  res.json({ googleClientId: process.env.GOOGLE_CLIENT_ID || '' });
+});
+
+// Google OAuth Login/Signup
+app.post('/api/auth/google-login', async (req, res) => {
+  try {
+    const { name, email } = req.body;
+    if (!name || !email) {
+      return res.status(400).json({ error: 'Name and email are required.' });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    let user;
+
+    if (isMongoConnected) {
+      user = await UserModel.findOne({ email: normalizedEmail }).lean();
+    } else {
+      const users = readUsersDB();
+      user = users.find(u => u.email === normalizedEmail);
+    }
+
+    if (!user) {
+      const initials = name.trim().split(/\s+/).map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'GU';
+      const newUser = {
+        name: name.trim(),
+        email: normalizedEmail,
+        passwordHash: 'GOOGLE_OAUTH_USER',
+        initials,
+        college: '',
+        course: '',
+        analytics: {
+          questionsAsked: 847,
+          quizzesDone: 28,
+          totalScore: 2352,
+          avgScore: 84,
+          flashcards: 342,
+          studyTime: 42,
+          summaries: 19,
+          streak: 7,
+          lastActive: new Date().toISOString()
+        }
+      };
+
+      if (isMongoConnected) {
+        user = await UserModel.create(newUser);
+        // Convert document to plain object
+        user = JSON.parse(JSON.stringify(user));
+      } else {
+        const users = readUsersDB();
+        users.push(newUser);
+        writeUsersDB(users);
+        user = newUser;
+      }
+    }
+
+    const { passwordHash: _, ...userProfile } = user;
+    res.json({ success: true, user: userProfile });
+  } catch (err) {
+    console.error("Google login error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Update Profile
 app.post('/api/auth/update-profile', async (req, res) => {
   try {

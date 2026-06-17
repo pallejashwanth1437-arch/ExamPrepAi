@@ -1,5 +1,50 @@
 // Central Application State using a simple Pub/Sub pattern
 
+// Check for Google OAuth callback token in hash
+try {
+  const hashParams = new URLSearchParams(window.location.hash.substring(1));
+  const accessToken = hashParams.get('access_token');
+  if (accessToken) {
+    // Clear the hash in the browser URL bar so it looks clean
+    window.history.replaceState(null, null, ' ');
+    handleGoogleCallback(accessToken);
+  }
+} catch (err) {
+  console.error("Failed to check Google OAuth callback:", err);
+}
+
+async function handleGoogleCallback(token) {
+  try {
+    const userinfoRes = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${token}`);
+    if (!userinfoRes.ok) throw new Error("Failed to fetch user info from Google");
+    const userinfo = await userinfoRes.json();
+    
+    // Call our backend to login/signup this Google user
+    const res = await fetch('/api/auth/google-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: userinfo.name || 'Google User',
+        email: userinfo.email
+      })
+    });
+    
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.error || "Google auth registration failed");
+    }
+    
+    const data = await res.json();
+    state.user = data.user;
+    localStorage.setItem('examprep_user', JSON.stringify(state.user));
+    state.currentPage = 'dashboard';
+    notify();
+  } catch (err) {
+    console.error("Google authentication error:", err);
+    alert("Google authentication failed: " + err.message);
+  }
+}
+
 // Retrieve persistent user from localStorage if it exists
 let savedUser = null;
 try {
@@ -467,6 +512,42 @@ export async function recordQuiz(score, totalQuestions) {
   }
 }
 
+export async function loginWithGoogle() {
+  try {
+    const res = await fetch('/api/auth/config');
+    if (!res.ok) throw new Error("Failed to load auth config");
+    const config = await res.json();
+    
+    if (config.googleClientId) {
+      const clientId = config.googleClientId;
+      const redirectUri = encodeURIComponent(window.location.origin + '/');
+      const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email`;
+      window.location.href = oauthUrl;
+    } else {
+      alert("Real Google Sign-In requires GOOGLE_CLIENT_ID environment variable. Logging you in with a demo Google account for preview...");
+      // Fallback: log in with a mock Google account using Palle Jashwanth credentials
+      const loginRes = await fetch('/api/auth/google-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'Palle Jashwanth',
+          email: 'pallejeshwanth1437@gmail.com'
+        })
+      });
+      if (!loginRes.ok) {
+        throw new Error("Failed to authenticate mock Google user");
+      }
+      const data = await loginRes.json();
+      state.user = data.user;
+      localStorage.setItem('examprep_user', JSON.stringify(state.user));
+      navigate('dashboard');
+    }
+  } catch (err) {
+    console.error("Google login redirect error:", err);
+    alert("Google login failed: " + err.message);
+  }
+}
+
 // Bind globally for ease of access from HTML inline triggers
 window.navigate = navigate;
 window.logout = logout;
@@ -480,4 +561,5 @@ window.generateFlashcardsFromServer = generateFlashcardsFromServer;
 window.generateSummaryFromServer = generateSummaryFromServer;
 window.generateQuestionsFromServer = generateQuestionsFromServer;
 window.recordQuiz = recordQuiz;
+window.loginWithGoogle = loginWithGoogle;
 

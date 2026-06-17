@@ -91,7 +91,7 @@ export function renderLogin() {
         </div>
         <div class="auth-title">Welcome back</div>
         <div class="auth-sub">Sign in to continue your learning journey</div>
-        <button class="google-btn" onclick="state.user = {name: 'Google User', email: 'google@gmail.com', initials: 'GU'}; localStorage.setItem('examprep_user', JSON.stringify(state.user)); navigate('dashboard')">
+        <button class="google-btn" onclick="loginWithGoogle()">
           <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2a10 10 0 0 0-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9a8.78 8.78 0 0 0 2.7-6.62z"/><path fill="#34A853" d="M9 18a8.6 8.6 0 0 0 5.96-2.18l-2.9-2.26a5.4 5.4 0 0 1-8.06-2.85H.96v2.34A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M4 10.71a5.4 5.4 0 0 1 0-3.42V4.95H.96a9 9 0 0 0 0 8.1L4 10.71z"/><path fill="#EA4335" d="M9 3.58a4.86 4.86 0 0 1 3.44 1.35l2.58-2.58A8.64 8.64 0 0 0 9 0 9 9 0 0 0 .96 4.95L4 7.29A5.37 5.37 0 0 1 9 3.58z"/></svg>
           Continue with Google
         </button>
@@ -127,7 +127,7 @@ export function renderSignup() {
         </div>
         <div class="auth-title">Create account</div>
         <div class="auth-sub">Start your AI-powered study journey today</div>
-        <button class="google-btn" onclick="state.user = {name: 'Google User', email: 'google@gmail.com', initials: 'GU'}; localStorage.setItem('examprep_user', JSON.stringify(state.user)); navigate('dashboard')">
+        <button class="google-btn" onclick="loginWithGoogle()">
           <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2a10 10 0 0 0-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9a8.78 8.78 0 0 0 2.7-6.62z"/><path fill="#34A853" d="M9 18a8.6 8.6 0 0 0 5.96-2.18l-2.9-2.26a5.4 5.4 0 0 1-8.06-2.85H.96v2.34A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M4 10.71a5.4 5.4 0 0 1 0-3.42V4.95H.96a9 9 0 0 0 0 8.1L4 10.71z"/><path fill="#EA4335" d="M9 3.58a4.86 4.86 0 0 1 3.44 1.35l2.58-2.58A8.64 8.64 0 0 0 9 0 9 9 0 0 0 .96 4.95L4 7.29A5.37 5.37 0 0 1 9 3.58z"/></svg>
           Continue with Google
         </button>
