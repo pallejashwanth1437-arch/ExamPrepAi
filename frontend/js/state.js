@@ -13,11 +13,20 @@ try {
   console.error("Failed to check Google OAuth callback:", err);
 }
 
+export async function safeJson(res) {
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    throw new Error(text.trim() || `HTTP error ${res.status}`);
+  }
+}
+
 async function handleGoogleCallback(token) {
   try {
     const userinfoRes = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${token}`);
     if (!userinfoRes.ok) throw new Error("Failed to fetch user info from Google");
-    const userinfo = await userinfoRes.json();
+    const userinfo = await safeJson(userinfoRes);
     
     // Call our backend to login/signup this Google user
     const res = await fetch('/api/auth/google-login', {
@@ -30,11 +39,17 @@ async function handleGoogleCallback(token) {
     });
     
     if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.error || "Google auth registration failed");
+      let errMsg = "Google auth registration failed";
+      try {
+        const errData = await safeJson(res);
+        errMsg = errData.error || errMsg;
+      } catch (e) {
+        errMsg = e.message;
+      }
+      throw new Error(errMsg);
     }
     
-    const data = await res.json();
+    const data = await safeJson(res);
     state.user = data.user;
     localStorage.setItem('examprep_user', JSON.stringify(state.user));
     state.currentPage = 'dashboard';
@@ -165,10 +180,17 @@ export async function updateProfile(name, email, college, course) {
       })
     });
 
-    const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.error || "Failed to update profile");
+      let errMsg = "Failed to update profile";
+      try {
+        const errData = await safeJson(res);
+        errMsg = errData.error || errMsg;
+      } catch (e) {
+        errMsg = e.message;
+      }
+      throw new Error(errMsg);
     }
+    const data = await safeJson(res);
 
     state.user = data.user;
     try {
@@ -196,7 +218,7 @@ export async function loadDocs() {
   try {
     const res = await fetch('/api/documents');
     if (!res.ok) throw new Error("Failed to load documents");
-    state.DOCS = await res.json();
+    state.DOCS = await safeJson(res);
     
     // Set default selected document
     if (!state.selectedDocId && state.DOCS.length > 0) {
@@ -233,9 +255,18 @@ export async function uploadDoc(file) {
       body: formData
     });
 
-    if (!res.ok) throw new Error("Upload failed");
+    if (!res.ok) {
+      let errMsg = "Upload failed";
+      try {
+        const errData = await safeJson(res);
+        errMsg = errData.error || errMsg;
+      } catch (e) {
+        errMsg = e.message;
+      }
+      throw new Error(errMsg);
+    }
     
-    const newDoc = await res.json();
+    const newDoc = await safeJson(res);
     
     // Replace temp doc with actual doc
     const idx = state.DOCS.findIndex(d => d.id === tempId);
@@ -257,7 +288,7 @@ export async function uploadDoc(file) {
     notify();
   } catch (err) {
     console.error("Upload error:", err);
-    alert("Upload failed. Make sure your backend server is running and .env is configured.");
+    alert("Upload failed: " + err.message);
     state.DOCS = state.DOCS.filter(d => !d.id.startsWith('temp-'));
     notify();
   }
@@ -303,11 +334,17 @@ export async function sendChatToServer(text) {
     });
 
     if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.error || "Failed to generate chat response");
+      let errMsg = "Failed to generate chat response";
+      try {
+        const errData = await safeJson(res);
+        errMsg = errData.error || errMsg;
+      } catch (e) {
+        errMsg = e.message;
+      }
+      throw new Error(errMsg);
     }
     
-    const data = await res.json();
+    const data = await safeJson(res);
     state.isTyping = false;
     state.chatMessages.push({
       role: 'ai',
@@ -362,11 +399,17 @@ export async function generateQuizFromServer(numQuestions, difficulty, types) {
     });
 
     if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.error || "Failed to generate quiz");
+      let errMsg = "Failed to generate quiz";
+      try {
+        const errData = await safeJson(res);
+        errMsg = errData.error || errMsg;
+      } catch (e) {
+        errMsg = e.message;
+      }
+      throw new Error(errMsg);
     }
 
-    state.QUIZ_DATA = await res.json();
+    state.QUIZ_DATA = await safeJson(res);
     state.quizState.started = true;
     state.isGeneratingQuiz = false;
     notify();
@@ -390,11 +433,17 @@ export async function generateFlashcardsFromServer() {
     });
 
     if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.error || "Failed to generate flashcards");
+      let errMsg = "Failed to generate flashcards";
+      try {
+        const errData = await safeJson(res);
+        errMsg = errData.error || errMsg;
+      } catch (e) {
+        errMsg = e.message;
+      }
+      throw new Error(errMsg);
     }
 
-    const cards = await res.json();
+    const cards = await safeJson(res);
     state.FLASHCARDS = cards;
     state.cardState = {
       idx: 0,
@@ -436,11 +485,17 @@ export async function generateSummaryFromServer(summaryType) {
     });
 
     if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.error || "Failed to generate summary");
+      let errMsg = "Failed to generate summary";
+      try {
+        const errData = await safeJson(res);
+        errMsg = errData.error || errMsg;
+      } catch (e) {
+        errMsg = e.message;
+      }
+      throw new Error(errMsg);
     }
 
-    const data = await res.json();
+    const data = await safeJson(res);
     state.summaryText = data.text;
     state.isGeneratingSummary = false;
 
@@ -472,11 +527,17 @@ export async function generateQuestionsFromServer() {
     });
 
     if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.error || "Failed to generate questions");
+      let errMsg = "Failed to generate questions";
+      try {
+        const errData = await safeJson(res);
+        errMsg = errData.error || errMsg;
+      } catch (e) {
+        errMsg = e.message;
+      }
+      throw new Error(errMsg);
     }
 
-    state.questionsData = await res.json();
+    state.questionsData = await safeJson(res);
     state.isGeneratingQuestions = false;
     notify();
   } catch (err) {
@@ -501,7 +562,7 @@ export async function recordQuiz(score, totalQuestions) {
     if (!res.ok) {
       throw new Error("Failed to record quiz results");
     }
-    const data = await res.json();
+    const data = await safeJson(res);
     if (data.success && data.user) {
       state.user = data.user;
       localStorage.setItem('examprep_user', JSON.stringify(state.user));
@@ -516,7 +577,7 @@ export async function loginWithGoogle() {
   try {
     const res = await fetch('/api/auth/config');
     if (!res.ok) throw new Error("Failed to load auth config");
-    const config = await res.json();
+    const config = await safeJson(res);
     
     if (config.googleClientId) {
       const clientId = config.googleClientId;
@@ -537,7 +598,7 @@ export async function loginWithGoogle() {
       if (!loginRes.ok) {
         throw new Error("Failed to authenticate mock Google user");
       }
-      const data = await loginRes.json();
+      const data = await safeJson(loginRes);
       state.user = data.user;
       localStorage.setItem('examprep_user', JSON.stringify(state.user));
       navigate('dashboard');

@@ -1,4 +1,4 @@
-import { state, navigate } from '../state.js';
+import { state, navigate, safeJson } from '../state.js';
 
 export async function handleLogin() {
   const email = document.getElementById('login-email')?.value?.trim();
@@ -16,10 +16,17 @@ export async function handleLogin() {
       body: JSON.stringify({ email, password: pass })
     });
 
-    const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.error || "Authentication failed");
+      let errMsg = "Authentication failed";
+      try {
+        const errData = await safeJson(res);
+        errMsg = errData.error || errMsg;
+      } catch (e) {
+        errMsg = e.message;
+      }
+      throw new Error(errMsg);
     }
+    const data = await safeJson(res);
 
     state.user = data.user;
     try {
@@ -58,10 +65,17 @@ export async function handleSignup() {
       body: JSON.stringify({ name, email, password: pass })
     });
 
-    const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.error || "Registration failed");
+      let errMsg = "Registration failed";
+      try {
+        const errData = await safeJson(res);
+        errMsg = errData.error || errMsg;
+      } catch (e) {
+        errMsg = e.message;
+      }
+      throw new Error(errMsg);
     }
+    const data = await safeJson(res);
 
     state.user = data.user;
     try {
