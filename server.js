@@ -31,16 +31,8 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 }
 
 // Multer storage configuration
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, UPLOADS_DIR);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
-});
-const upload = multer({ storage });
+// Multer configuration: use memory storage to be compatible with serverless/read-only environments
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Database helper
 import mongoose from 'mongoose';
@@ -72,7 +64,8 @@ const documentSchema = new mongoose.Schema({
   chunks: { type: mongoose.Schema.Types.Mixed, default: 1 },
   status: { type: String, default: 'ready' },
   pdfFile: { type: String, required: true },
-  textFile: { type: String, required: true }
+  textFile: { type: String, required: true },
+  content: { type: String, default: '' }
 });
 
 const DocumentModel = mongoose.models.Document || mongoose.model('Document', documentSchema);
@@ -199,7 +192,11 @@ async function getDocText(docId) {
     const db = readDB();
     doc = db.find(d => d.id === docId);
   }
-  if (!doc || !doc.textFile) return '';
+  if (!doc) return '';
+  if (doc.content) {
+    return doc.content;
+  }
+  if (!doc.textFile) return '';
   const textFilePath = path.join(UPLOADS_DIR, doc.textFile);
   if (fs.existsSync(textFilePath)) {
     return fs.readFileSync(textFilePath, 'utf-8');
@@ -242,18 +239,21 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const filePath = req.file.path;
-    const fileBuffer = fs.readFileSync(filePath);
+    const fileBuffer = req.file.buffer;
 
     // Extract text from PDF
     const data = await pdf(fileBuffer);
     const textContent = data.text;
     const pageCount = data.numpages;
 
-    // Save text contents to associated txt file
+    // Save text contents to associated txt file (optional backup)
     const docId = Date.now().toString();
     const textFileName = `${docId}.txt`;
-    fs.writeFileSync(path.join(UPLOADS_DIR, textFileName), textContent);
+    try {
+      fs.writeFileSync(path.join(UPLOADS_DIR, textFileName), textContent);
+    } catch (e) {
+      console.warn("Could not write txt backup file to disk (expected in serverless environments):", e.message);
+    }
 
     // Create metadata record
     const newDoc = {
@@ -263,8 +263,9 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
       chunks: Math.ceil(textContent.length / 1000) || 1,
       status: 'ready',
-      pdfFile: req.file.filename,
-      textFile: textFileName
+      pdfFile: req.file.originalname,
+      textFile: textFileName,
+      content: textContent
     };
 
     if (isMongoConnected) {
@@ -309,11 +310,15 @@ app.delete('/api/documents/:id', async (req, res) => {
       writeDB(db);
     }
     
-    // Delete files
-    const pdfPath = path.join(UPLOADS_DIR, doc.pdfFile);
-    const txtPath = path.join(UPLOADS_DIR, doc.textFile);
-    if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath);
-    if (fs.existsSync(txtPath)) fs.unlinkSync(txtPath);
+    // Delete files (optional backup cleanup)
+    try {
+      const pdfPath = path.join(UPLOADS_DIR, doc.pdfFile);
+      const txtPath = path.join(UPLOADS_DIR, doc.textFile);
+      if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath);
+      if (fs.existsSync(txtPath)) fs.unlinkSync(txtPath);
+    } catch (e) {
+      console.warn("Could not delete backup files from disk:", e.message);
+    }
 
     res.json({ success: true });
   } catch (err) {
@@ -739,6 +744,10 @@ app.post('/api/auth/record-quiz', async (req, res) => {
 });
 
 // Start Server
-app.listen(PORT, () => {
-  console.log(`ExamPrep AI backend is running on http://localhost:${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`ExamPrep AI backend is running on http://localhost:${PORT}`);
+  });
+}
+
+export default app;
