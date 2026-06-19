@@ -72,7 +72,7 @@ try {
 }
 
 export const state = {
-  currentPage: savedUser ? 'dashboard' : 'landing',
+  currentPage: savedUser ? 'dashboard' : 'login',
   selectedDocId: null, // Tracks currently active document
   user: savedUser,
   
@@ -135,7 +135,11 @@ export function notify() {
 
 // Global actions
 export function navigate(page) {
-  const publicPages = ['landing', 'login', 'signup'];
+  const publicPages = ['login', 'signup'];
+  if (page === 'landing') {
+    window.location.href = '/';
+    return;
+  }
   if (!publicPages.includes(page) && !state.user) {
     state.currentPage = 'login';
   } else {
@@ -156,7 +160,7 @@ export function logout() {
     console.error("Failed to remove user from localStorage:", err);
   }
   state.user = null;
-  state.currentPage = 'landing';
+  state.currentPage = 'login';
   notify();
 }
 

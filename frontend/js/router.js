@@ -2,7 +2,6 @@ import { state, subscribe, loadDocs } from './state.js';
 import { renderSidebar, renderTopbar, renderNavbar } from './components.js';
 import { initParticles } from './utils.js';
 
-import { renderLanding } from './pages/landing.js';
 import { renderLogin, renderSignup } from './pages/auth.js';
 import { renderDashboard } from './pages/dashboard.js';
 import { renderDocuments } from './pages/documents.js';
@@ -21,11 +20,6 @@ export function render() {
 
   const { currentPage } = state;
 
-  if (currentPage === 'landing') {
-    root.innerHTML = renderLanding();
-    setTimeout(initParticles, 100);
-    return;
-  }
   if (currentPage === 'login') {
     root.innerHTML = renderLogin();
     return;
