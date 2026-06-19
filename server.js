@@ -61,6 +61,7 @@ if (MONGODB_URI && !MONGODB_URI.includes('<db_password>')) {
 // Document Schema
 const documentSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
+  userEmail: { type: String, default: '' },
   name: { type: String, required: true },
   pages: { type: mongoose.Schema.Types.Mixed, default: 1 },
   date: { type: String, required: true },
@@ -294,11 +295,18 @@ async function generateContentWithFallback(prompt, jsonOutput = false) {
 // 1. Get List of Documents
 app.get('/api/documents', async (req, res) => {
   try {
+    const userEmail = (req.query.email || '').toLowerCase().trim();
+    if (!userEmail) {
+      return res.json([]);
+    }
+
     if (isMongoConnected) {
-      const docs = await DocumentModel.find({}).lean();
+      const docs = await DocumentModel.find({ userEmail }).lean();
       return res.json(docs);
     }
-    res.json(readDB());
+    const allDocs = readDB();
+    const userDocs = allDocs.filter(d => (d.userEmail || '').toLowerCase().trim() === userEmail);
+    res.json(userDocs);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -330,6 +338,7 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
     // Create metadata record
     const newDoc = {
       id: docId,
+      userEmail: (req.body.email || '').toLowerCase().trim(),
       name: req.file.originalname,
       pages: pageCount || 1,
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),

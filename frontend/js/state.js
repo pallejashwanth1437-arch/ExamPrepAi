@@ -216,13 +216,20 @@ export function selectDoc(docId) {
 
 export async function loadDocs() {
   try {
-    const res = await fetch('/api/documents');
+    if (!state.user?.email) {
+      state.DOCS = [];
+      notify();
+      return;
+    }
+    const res = await fetch(`/api/documents?email=${encodeURIComponent(state.user.email)}`);
     if (!res.ok) throw new Error("Failed to load documents");
     state.DOCS = await safeJson(res);
     
     // Set default selected document
     if (!state.selectedDocId && state.DOCS.length > 0) {
       state.selectedDocId = state.DOCS[0].id;
+    } else if (state.DOCS.length === 0) {
+      state.selectedDocId = null;
     }
     notify();
   } catch (err) {
@@ -585,29 +592,7 @@ export async function loginWithGoogle() {
       const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email`;
       window.location.href = oauthUrl;
     } else {
-      const userEmail = prompt("Google Sign-In is in demo mode. Please enter your email to simulate your profile login:", "student@examprep.ai");
-      if (!userEmail) return;
-
-      const emailParts = userEmail.split('@');
-      let userName = emailParts[0];
-      userName = userName.charAt(0).toUpperCase() + userName.slice(1);
-
-      // Fallback: log in with a mock Google account using dynamic credentials
-      const loginRes = await fetch('/api/auth/google-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: userName + " (Demo)",
-          email: userEmail.toLowerCase().trim()
-        })
-      });
-      if (!loginRes.ok) {
-        throw new Error("Failed to authenticate mock Google user");
-      }
-      const data = await safeJson(loginRes);
-      state.user = data.user;
-      localStorage.setItem('examprep_user', JSON.stringify(state.user));
-      navigate('dashboard');
+      alert("Google Sign-In is not configured yet on this platform (GOOGLE_CLIENT_ID environment variable is missing). Please sign up or log in using your email and password details instead.");
     }
   } catch (err) {
     console.error("Google login redirect error:", err);
