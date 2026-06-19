@@ -141,6 +141,11 @@ export function navigate(page) {
   } else {
     state.currentPage = page;
   }
+  
+  if (state.user && ['dashboard', 'documents', 'chat', 'quizzes', 'flashcards', 'summaries', 'questions', 'analytics'].includes(state.currentPage)) {
+    loadDocs();
+  }
+  
   notify();
 }
 

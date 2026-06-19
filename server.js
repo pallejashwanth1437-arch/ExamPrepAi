@@ -688,6 +688,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
 
     const passwordHash = hashPassword(password);
+    console.log(`[Auth] Comparing hashes for ${normalizedEmail}: database=${user.passwordHash} vs input=${passwordHash}`);
     if (user.passwordHash !== passwordHash) {
       return res.status(400).json({ error: 'Invalid email or password.' });
     }
