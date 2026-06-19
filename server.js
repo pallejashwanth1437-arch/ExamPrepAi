@@ -232,16 +232,61 @@ async function getDocText(docId) {
 }
 
 // Gemini AI Helper
-function getGenAIModel(jsonOutput = false) {
+function getGenAIModel(jsonOutput = false, modelName = "gemini-2.5-flash") {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY is not set. Please configure it in your .env file.");
   }
   const genAI = new GoogleGenerativeAI(apiKey);
   return genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
+    model: modelName,
     generationConfig: jsonOutput ? { responseMimeType: "application/json" } : {}
   });
+}
+
+// Generate content with automatic model fallback and retries to handle upstream demand spikes (503) or missing models (404)
+async function generateContentWithFallback(prompt, jsonOutput = false) {
+  const modelsToTry = [
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
+    "gemini-3.1-flash-lite",
+    "gemini-flash-lite-latest",
+    "gemini-3.5-flash"
+  ];
+  
+  let lastError = null;
+  
+  for (let i = 0; i < modelsToTry.length; i++) {
+    const modelName = modelsToTry[i];
+    try {
+      console.log(`[Gemini API] Attempting generation with ${modelName}...`);
+      const model = getGenAIModel(jsonOutput, modelName);
+      const result = await model.generateContent(prompt);
+      return result.response.text();
+    } catch (err) {
+      lastError = err;
+      console.warn(`[Gemini API] ${modelName} failed: ${err.message}`);
+      
+      // If it's a transient rate limit (429) or high demand (503), wait 1.2s and try again
+      if (err.message.includes("503") || err.message.includes("429") || err.message.includes("demand")) {
+        console.log("[Gemini API] Temporary overload. Waiting 1.2s...");
+        await new Promise(r => setTimeout(r, 1200));
+        
+        // Retry the current model once
+        try {
+          console.log(`[Gemini API] Retrying ${modelName} after delay...`);
+          const modelRetry = getGenAIModel(jsonOutput, modelName);
+          const resultRetry = await modelRetry.generateContent(prompt);
+          return resultRetry.response.text();
+        } catch (retryErr) {
+          lastError = retryErr;
+          console.warn(`[Gemini API] Retry for ${modelName} failed: ${retryErr.message}`);
+        }
+      }
+    }
+  }
+  
+  throw new Error(`AI model query failed: All fallback models exhausted. Last error: ${lastError?.message}`);
 }
 
 // --- API ENDPOINTS ---
@@ -384,9 +429,7 @@ ${docText}
 
     prompt += `User: ${message}\nAssistant:`;
 
-    const model = getGenAIModel();
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
+    const responseText = await generateContentWithFallback(prompt, false);
 
     if (email) {
       await incrementUserAnalytic(email, 'questionsAsked');
@@ -429,9 +472,7 @@ Output MUST be a JSON array of objects. Each object must have this exact schema:
 
 Do not include markdown code block syntax (like \`\`\`json) in your response. Return ONLY the JSON array.`;
 
-    const model = getGenAIModel(true);
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
+    const responseText = await generateContentWithFallback(prompt, true);
 
     res.json(JSON.parse(responseText.trim()));
   } catch (err) {
@@ -465,9 +506,7 @@ Output MUST be a JSON array of objects. Each object must have this exact schema:
 
 Do not include markdown code block syntax. Return ONLY the JSON array.`;
 
-    const model = getGenAIModel(true);
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
+    const responseText = await generateContentWithFallback(prompt, true);
     const cards = JSON.parse(responseText.trim());
 
     if (email && Array.isArray(cards)) {
@@ -501,9 +540,7 @@ Document Context:
 ${docText}
 ---`;
 
-    const model = getGenAIModel();
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
+    const responseText = await generateContentWithFallback(prompt, false);
 
     if (email) {
       await incrementUserAnalytic(email, 'summaries');
@@ -544,9 +581,7 @@ Output MUST be a JSON array of objects. Each object must have this exact schema:
 
 Do not include markdown code block syntax. Return ONLY the JSON array.`;
 
-    const model = getGenAIModel(true);
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
+    const responseText = await generateContentWithFallback(prompt, true);
 
     res.json(JSON.parse(responseText.trim()));
   } catch (err) {

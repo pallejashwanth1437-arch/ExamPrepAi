@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ExamPrep AI — AI-powered exam preparation: chat, quizzes, flashcards, summaries, and analytics">
+  <title>ExamPrep AI — Dashboard</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Main Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+  <h2 class="sr-only">ExamPrep AI — AI-powered exam preparation platform with chat, quizzes, flashcards, summaries, and analytics</h2>
+  
+  <div id="root"></div>
+
+  <!-- Entry JavaScript Module -->
+  <script type="module">
+    import { navigate } from './js/state.js';
+    import { render } from './js/router.js';
+
+    // Expose navigate globally so inline HTML onclick triggers can route views
+    window.navigate = navigate;
+
+    // Check if a simple hash route was requested (e.g. app.html#login or app.html#signup)
+    // NOTE: state.js already checks for OAuth access_token in hash at module load time.
+    // Only use hash routing if the hash is a plain page name (not an OAuth token).
+    const hash = window.location.hash.replace('#', '');
+    const validRoutes = ['login', 'signup', 'dashboard', 'landing', 'chat', 'quizzes', 'flashcards', 'summaries', 'questions', 'analytics', 'profile', 'documents', 'settings'];
+    
+    if (hash && validRoutes.includes(hash)) {
+      // Clean the URL, then navigate to the requested page
+      window.history.replaceState(null, null, window.location.pathname);
+      navigate(hash);
+    } else {
+      // Boot the application (shows landing or dashboard if logged in)
+      render();
+    }
+  </script>
+</body>
+</html>

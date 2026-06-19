@@ -87,6 +87,14 @@ export function renderTopbar() {
   `;
 }
 
+export function toggleMobileMenu() {
+  const app = document.querySelector('.app');
+  if (app) {
+    app.classList.toggle('menu-open');
+  }
+}
+window.toggleMobileMenu = toggleMobileMenu;
+
 export function renderNavbar() {
   const items = [
     { id: 'dashboard', label: 'Dashboard' },
@@ -102,6 +110,9 @@ export function renderNavbar() {
   return `
     <header class="navbar-horizontal">
       <div class="nav-left">
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle Navigation Menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text2);"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
         <span class="lp-nav-logo" style="font-size: 19px; font-weight: 800; background: linear-gradient(135deg, #fff, var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.02em; cursor: pointer;" onclick="navigate('dashboard')">ExamPrep AI</span>
         <nav class="nav-links">
           ${items.map(i => `
@@ -134,6 +145,36 @@ export function renderNavbar() {
         </div>
       </div>
     </header>
+    
+    <!-- Mobile Navigation Drawer Overlay -->
+    <div class="drawer-overlay" onclick="toggleMobileMenu()"></div>
+    
+    <!-- Mobile Slide-out Drawer Panel -->
+    <div class="mobile-drawer">
+      <div class="drawer-header">
+        <span class="lp-nav-logo" style="font-size: 19px; font-weight: 800; background: linear-gradient(135deg, #fff, var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.02em;">ExamPrep AI</span>
+        <button class="drawer-close-btn" onclick="toggleMobileMenu()">×</button>
+      </div>
+      <nav class="drawer-links">
+        ${items.map(i => `
+          <button class="drawer-link${state.currentPage === i.id ? ' active' : ''}" onclick="navigate('${i.id}'); toggleMobileMenu();">
+            ${i.label}
+          </button>
+        `).join('')}
+      </nav>
+      <div style="flex: 1;"></div>
+      <hr style="border: 0; border-top: 1px solid var(--border); margin: 16px 0;">
+      <div class="user-mini" onclick="navigate('profile'); toggleMobileMenu();" style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 6px;">
+        <div class="avatar" style="width: 34px; height: 34px; font-size: 13px; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 700;">
+          ${state.user?.initials || 'PJ'}
+        </div>
+        <div class="user-info">
+          <div class="user-name" style="font-size: 13px; font-weight: 600; color: var(--text1);">${state.user?.name || 'Palle Jashwanth'}</div>
+          <div class="user-plan" style="font-size: 11px; color: var(--accent3);">⭐ Pro Plan</div>
+        </div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="logout(); toggleMobileMenu();" style="margin-top: 12px; justify-content: center; width: 100%; font-weight: 700; padding: 8px;">🚪 Log Out</button>
+    </div>
   `;
 }
 

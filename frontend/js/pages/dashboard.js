@@ -12,21 +12,21 @@ export function renderDashboard() {
   };
 
   const stats = [
-    { label: 'Documents', val: state.DOCS.length.toString(), color: 'purple', sub: 'Up-to-date' },
-    { label: 'Questions Asked', val: (analytics.questionsAsked ?? 847).toString(), color: 'cyan', sub: '34 today' },
-    { label: 'Quizzes Done', val: (analytics.quizzesDone ?? 28).toString(), color: 'green', sub: '3 this week' },
-    { label: 'Avg Score', val: `${Math.round(analytics.avgScore ?? 84)}%`, color: 'amber', sub: '6% this month' },
-    { label: 'Flashcards', val: (analytics.flashcards ?? 342).toString(), color: 'pink', sub: '48 today' },
-    { label: 'Study Time', val: `${analytics.studyTime ?? 42}h`, color: 'purple', sub: 'This month' },
-    { label: 'Summaries', val: (analytics.summaries ?? 19).toString(), color: 'cyan', sub: 'Generated' },
-    { label: 'Streak', val: (analytics.streak ?? 7).toString(), color: 'amber', sub: 'Days active' }
+    { label: 'Documents', val: state.DOCS.length.toString(), color: 'purple', sub: 'Up-to-date', ico: '📁' },
+    { label: 'Questions Asked', val: (analytics.questionsAsked ?? 847).toString(), color: 'cyan', sub: '34 today', ico: '💬' },
+    { label: 'Quizzes Done', val: (analytics.quizzesDone ?? 28).toString(), color: 'green', sub: '3 this week', ico: '📝' },
+    { label: 'Avg Score', val: `${Math.round(analytics.avgScore ?? 84)}%`, color: 'amber', sub: '6% this month', ico: '🎯' },
+    { label: 'Flashcards', val: (analytics.flashcards ?? 342).toString(), color: 'pink', sub: '48 today', ico: '🃏' },
+    { label: 'Study Time', val: `${analytics.studyTime ?? 42}h`, color: 'purple', sub: 'This month', ico: '⏱' },
+    { label: 'Summaries', val: (analytics.summaries ?? 19).toString(), color: 'cyan', sub: 'Generated', ico: '📄' },
+    { label: 'Streak', val: (analytics.streak ?? 7).toString(), color: 'amber', sub: 'Days active', ico: '🔥' }
   ];
 
   const activities = [
-    { text: 'Completed "Cell Biology" quiz', sub: 'Score: 88% • 2h ago', col: 'green' },
-    { text: 'Chatted with "Organic Chem PDF"', sub: '18 questions • 4h ago', col: 'cyan' },
-    { text: 'Studied 32 flashcards', sub: 'Known: 24 • Unknown: 8 • 6h ago', col: 'purple' },
-    { text: 'Uploaded new document', sub: 'Thermodynamics Ch.5 • Yesterday', col: 'amber' }
+    { text: 'Completed "Cell Biology" quiz', sub: 'Score: 88% • 2h ago', col: 'green', ico: '📝' },
+    { text: 'Chatted with "Organic Chem PDF"', sub: '18 questions • 4h ago', col: 'cyan', ico: '💬' },
+    { text: 'Studied 32 flashcards', sub: 'Known: 24 • Unknown: 8 • 6h ago', col: 'purple', ico: '🃏' },
+    { text: 'Uploaded new document', sub: 'Thermodynamics Ch.5 • Yesterday', col: 'amber', ico: '📤' }
   ];
 
   const chartData = [
@@ -54,7 +54,8 @@ export function renderDashboard() {
         ${stats.map((s, idx) => `
           <div class="premium-stat-card ${s.color} animate-fade-in delay-${idx + 1}">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px">
-              <span style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text3)">${s.label}</span>
+              <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text3)">${s.label}</span>
+              <div class="stat-icon-wrap">${s.ico}</div>
             </div>
             <div class="stat-val">${s.val}</div>
             <div class="stat-sub" style="color: ${s.color === 'red' ? 'var(--red)' : 'var(--green)'}">${s.sub}</div>
@@ -88,10 +89,13 @@ export function renderDashboard() {
           </div>
           <div class="glass-card animate-fade-in delay-6" style="padding: 0; overflow: hidden; border-radius: 16px;">
             ${activities.map(a => `
-              <div class="activity-item" style="display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--border); background: transparent">
+              <div class="activity-item" style="display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-bottom: 1px solid var(--border); background: transparent">
+                <div class="activity-icon-wrap" style="width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;">
+                  ${a.ico}
+                </div>
                 <div style="flex: 1; min-width: 0">
-                  <div style="font-size: 13px; font-weight: 500">${a.text}</div>
-                  <div style="font-size: 11px; color: var(--text3)">${a.sub}</div>
+                  <div style="font-size: 13px; font-weight: 600; color: var(--text1);">${a.text}</div>
+                  <div style="font-size: 11px; color: var(--text3); margin-top: 2px">${a.sub}</div>
                 </div>
               </div>
             `).join('')}

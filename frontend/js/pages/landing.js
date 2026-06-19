@@ -20,7 +20,8 @@ export function renderLanding() {
       <nav class="lp-nav" style="border-bottom: 1px solid var(--border); background: rgba(8, 12, 20, 0.85); backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 1000; padding: 0 40px;">
         <span class="lp-nav-logo" style="font-size: 20px; font-weight: 800; background: linear-gradient(135deg, #fff, var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.02em;">⚡ ExamPrep AI</span>
         <div style="display: flex; gap: 12px; align-items: center">
-          <button class="btn btn-outline btn-sm" onclick="navigate('login')" style="border-radius: 20px; padding: 6px 16px;">Go to App</button>
+          <a href="index.html" style="font-size: 12px; color: var(--text3); text-decoration: none; display: flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); transition: all .15s;" onmouseover="this.style.color='var(--text1)';this.style.borderColor='var(--border2)'" onmouseout="this.style.color='var(--text3)';this.style.borderColor='var(--border)'">← Product Tour</a>
+          <button class="btn btn-outline btn-sm" onclick="navigate('login')" style="border-radius: 20px; padding: 6px 16px;">Sign In</button>
           <button class="btn btn-primary btn-sm" onclick="navigate('signup')" style="border-radius: 20px; padding: 6px 18px; box-shadow: 0 0 16px rgba(99,102,241,0.4);">Get Started</button>
         </div>
       </nav>

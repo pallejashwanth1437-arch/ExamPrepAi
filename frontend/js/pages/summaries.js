@@ -45,34 +45,35 @@ export function renderSummaries() {
   let outputHTML = '';
   if (state.isGeneratingSummary) {
     outputHTML = `
-      <div style="text-align: center; padding: 40px;">
-        <div style="font-size: 48px; margin-bottom: 16px" class="typing-dot">📄</div>
-        <h3 style="font-weight: 700; margin-bottom: 6px">Generating Study Notes...</h3>
-        <p style="color: var(--text3); font-size: 13px">Gemini is summarizing the document contents. Please wait.</p>
+      <div class="scanner-container">
+        <div class="scanner-bar"></div>
+        <div style="font-size: 48px; margin-bottom: 16px; filter: drop-shadow(0 0 10px var(--accent));">📄</div>
+        <h3 style="font-weight: 700; margin-bottom: 6px; color: var(--text1)">Generating Study Notes...</h3>
+        <p style="color: var(--text2); font-size: 13px; text-align: center; max-width: 320px; line-height: 1.5;">Gemini is consolidating chapters and preparing structured summary blocks. Please wait.</p>
       </div>
     `;
   } else if (state.summaryText) {
     outputHTML = `
-      <div class="glass-card" style="margin-bottom: 12px">
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px">
-          <span>📄</span>
+      <div class="glass-card animate-fade-in" style="margin-bottom: 12px">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px">
+          <span style="font-size: 20px;">📄</span>
           <div>
-            <div style="font-size: 13px; font-weight: 600">${activeDocName}</div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--text1);">${activeDocName}</div>
             <div style="font-size: 11px; color: var(--text3)">Summary generated via Gemini AI</div>
           </div>
         </div>
         <div class="summary-block" style="max-height: 480px; overflow-y: auto;">
           ${formatSummaryMarkdown(state.summaryText)}
         </div>
-        <div style="display: flex; gap: 8px; margin-top: 12px">
-          <button class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText(\`${state.summaryText.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`); alert('Copied to clipboard!');">📋 Copy Text</button>
-          <button class="btn btn-outline btn-sm" onclick="navigate('chat')">💬 Chat with Context</button>
+        <div style="display: flex; gap: 8px; margin-top: 14px">
+          <button class="btn btn-outline btn-sm" onclick="navigator.clipboard.writeText(\`${state.summaryText.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`); alert('Copied to clipboard!');" style="font-weight: 600;">📋 Copy Text</button>
+          <button class="btn btn-outline btn-sm" onclick="navigate('chat')" style="font-weight: 600;">💬 Chat with Context</button>
         </div>
       </div>
     `;
   } else {
     outputHTML = `
-      <div style="text-align: center; padding: 50px 20px; color: var(--text3); font-size: 13px;" class="glass-card">
+      <div style="text-align: center; padding: 50px 20px; color: var(--text3); font-size: 13px;" class="glass-card animate-fade-in">
         Select a document, choose a summary type, and click "Generate Summary" to compile AI study notes.
       </div>
     `;
@@ -80,16 +81,16 @@ export function renderSummaries() {
 
   return `
     <div class="page active" style="padding: 24px">
-      <div class="page-header">
-        <h1>📄 AI Summaries</h1>
-        <p>Generate comprehensive summaries and study notes instantly</p>
+      <div class="page-header animate-fade-in">
+        <h1 style="font-size: 24px; font-weight: 800; background: linear-gradient(135deg, #fff, var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent">📄 AI Summaries</h1>
+        <p style="color: var(--text2)">Generate comprehensive summaries and structured study notes instantly</p>
       </div>
       
       <div class="grid-2" style="margin-bottom: 20px">
-        <div class="glass-card">
-          <div class="sec-title" style="margin-bottom: 14px">⚙️ Generate Summary</div>
+        <div class="glass-card animate-fade-in delay-1">
+          <div class="sec-title" style="margin-bottom: 16px">⚙️ Generate Summary</div>
           <div class="form-row">
-            <label>Select Document</label>
+            <label>Select Study Material</label>
             <select id="summary-doc-select" onchange="selectDoc(this.value)">
               ${state.DOCS.filter(d => d.status === 'ready').map(d => `<option value="${d.id}" ${state.selectedDocId === d.id ? 'selected' : ''}>${d.name}</option>`).join('')}
             </select>
@@ -106,10 +107,10 @@ export function renderSummaries() {
               <option value="Revision Notes">🔄 Revision Notes (Question-answer study guide)</option>
             </select>
           </div>
-          <button class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 10px" onclick="generateSummary()">⚡ Generate Summary</button>
+          <button class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 14px; padding: 12px; font-weight: 700;" onclick="generateSummary()">⚡ Generate Summary</button>
         </div>
         
-        <div>
+        <div class="animate-fade-in delay-2">
           ${outputHTML}
         </div>
       </div>
