@@ -585,14 +585,20 @@ export async function loginWithGoogle() {
       const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email`;
       window.location.href = oauthUrl;
     } else {
-      alert("Real Google Sign-In requires GOOGLE_CLIENT_ID environment variable. Logging you in with a demo Google account for preview...");
-      // Fallback: log in with a mock Google account using Palle Jashwanth credentials
+      const userEmail = prompt("Google Sign-In is in demo mode. Please enter your email to simulate your profile login:", "student@examprep.ai");
+      if (!userEmail) return;
+
+      const emailParts = userEmail.split('@');
+      let userName = emailParts[0];
+      userName = userName.charAt(0).toUpperCase() + userName.slice(1);
+
+      // Fallback: log in with a mock Google account using dynamic credentials
       const loginRes = await fetch('/api/auth/google-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: 'Palle Jashwanth',
-          email: 'pallejeshwanth1437@gmail.com'
+          name: userName + " (Demo)",
+          email: userEmail.toLowerCase().trim()
         })
       });
       if (!loginRes.ok) {
