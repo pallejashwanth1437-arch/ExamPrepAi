@@ -30,6 +30,25 @@ window.triggerUpload = triggerUpload;
 window.handleFileSelect = handleFileSelect;
 
 export function renderDocuments() {
+  const isUploading = state.isUploading || false;
+  
+  const uploadZoneHTML = isUploading ? `
+    <div class="upload-zone processing" style="pointer-events: none; border-style: solid; border-color: var(--accent); position: relative; overflow: hidden; padding: 40px 20px;">
+      <div class="scanner-bar" style="animation: scanning 1.5s ease-in-out infinite;"></div>
+      <div class="upload-icon" style="font-size: 36px; margin-bottom: 12px; filter: drop-shadow(0 0 10px var(--accent));">⏳</div>
+      <div style="font-size: 16px; font-weight: 700; margin-bottom: 6px; color: var(--text1)">Uploading & Parsing PDF...</div>
+      <div style="font-size: 13px; color: var(--text2)">Extracting pages and semantic chunks. Please wait.</div>
+    </div>
+  ` : `
+    <div class="upload-zone" id="dropzone" onclick="triggerUpload()" ondragover="event.preventDefault(); this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="event.preventDefault(); this.classList.remove('drag'); const dt = event.dataTransfer; if (dt.files.length) { handleFileSelect({files: dt.files}); }">
+      <div class="upload-icon">📤</div>
+      <div style="font-size: 16px; font-weight: 700; margin-bottom: 6px; color: var(--text1)">Drop your PDFs here</div>
+      <div style="font-size: 13px; color: var(--text2); margin-bottom: 16px">or click to browse files</div>
+      <button class="btn btn-primary" onclick="event.stopPropagation(); triggerUpload();">Browse Files</button>
+      <div style="font-size: 11px; color: var(--text3); margin-top: 10px">Supports PDF • Max 50MB • Up to 500 pages</div>
+    </div>
+  `;
+
   return `
     <div class="page active" style="padding: 24px">
       <div class="page-header animate-fade-in">
@@ -41,13 +60,7 @@ export function renderDocuments() {
       <input type="file" id="pdf-file-input" accept="application/pdf" style="display: none" onchange="handleFileSelect(this)">
       
       <div class="glass-card animate-fade-in delay-1" style="margin-bottom: 24px">
-        <div class="upload-zone" id="dropzone" onclick="triggerUpload()" ondragover="event.preventDefault(); this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="event.preventDefault(); this.classList.remove('drag'); const dt = event.dataTransfer; if (dt.files.length) { handleFileSelect({files: dt.files}); }">
-          <div class="upload-icon">📤</div>
-          <div style="font-size: 16px; font-weight: 700; margin-bottom: 6px; color: var(--text1)">Drop your PDFs here</div>
-          <div style="font-size: 13px; color: var(--text2); margin-bottom: 16px">or click to browse files</div>
-          <button class="btn btn-primary" onclick="event.stopPropagation(); triggerUpload();">Browse Files</button>
-          <div style="font-size: 11px; color: var(--text3); margin-top: 10px">Supports PDF • Max 50MB • Up to 500 pages</div>
-        </div>
+        ${uploadZoneHTML}
       </div>
       
       <div class="sec-header animate-fade-in delay-2">

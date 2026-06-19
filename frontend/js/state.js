@@ -101,6 +101,7 @@ export const state = {
   
   chatInput: '',
   isTyping: false,
+  isUploading: false,
   
   // Dynamic API state loaded from server
   DOCS: [],
@@ -248,6 +249,7 @@ export async function loadDocs() {
 
 export async function uploadDoc(file) {
   try {
+    state.isUploading = true;
     // Inject a temporary loading document
     const tempId = 'temp-' + Date.now();
     state.DOCS.push({
@@ -301,11 +303,13 @@ export async function uploadDoc(file) {
       localStorage.setItem('examprep_user', JSON.stringify(state.user));
     }
 
+    state.isUploading = false;
     notify();
   } catch (err) {
     console.error("Upload error:", err);
     alert("Upload failed: " + err.message);
     state.DOCS = state.DOCS.filter(d => !d.id.startsWith('temp-'));
+    state.isUploading = false;
     notify();
   }
 }
