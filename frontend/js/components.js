@@ -113,7 +113,12 @@ export function renderNavbar() {
         <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle Navigation Menu">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text2);"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </button>
-        <span class="lp-nav-logo" style="font-size: 19px; font-weight: 800; background: linear-gradient(135deg, #fff, var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.02em; cursor: pointer;" onclick="navigate('dashboard')">ExamPrep AI</span>
+        <div class="nav-logo-container" onclick="navigate('dashboard')" style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+          <div class="nav-logo-icon-circle">
+            <svg class="nav-logo-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/><path d="M21.5 12v6"/></svg>
+          </div>
+          <span class="nav-logo-text">ExamPrep AI</span>
+        </div>
         <nav class="nav-links">
           ${items.map(i => `
             <button class="nav-link${state.currentPage === i.id ? ' active' : ''}" onclick="navigate('${i.id}')">
@@ -123,14 +128,15 @@ export function renderNavbar() {
         </nav>
       </div>
       <div class="nav-right">
-        <div class="icon-btn" style="position: relative; display: flex; align-items: center;" onclick="alert('No new notifications')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text2);"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-          <span class="badge"></span>
-        </div>
+        <button class="nav-pill-btn" onclick="alert('No new notifications')" aria-label="Notifications" style="position: relative;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: rgba(255, 255, 255, 0.75);"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span class="badge" style="width: 6px; height: 6px; background: var(--accent); border-radius: 50%; position: absolute; top: 4px; right: 4px; border: 1px solid rgba(0,0,0,0.5);"></span>
+        </button>
         <div class="user-dropdown">
-          <div class="avatar" style="width: 36px; height: 36px; font-size: 13.5px; cursor: pointer; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 700; border: 1.5px solid rgba(255,255,255,0.1);">
-            ${state.user?.initials || 'PJ'}
-          </div>
+          <button class="nav-pill-btn profile-trigger">
+            <span class="avatar-mini-circle">${state.user?.initials || 'PJ'}</span>
+            <span class="profile-text">${state.user?.name ? state.user.name.split(' ')[0] : 'Profile'}</span>
+          </button>
           <div class="dropdown-menu">
             <div class="dropdown-user-info">
               <div class="dropdown-username">${state.user?.name || 'Palle Jashwanth'}</div>
@@ -152,7 +158,12 @@ export function renderNavbar() {
     <!-- Mobile Slide-out Drawer Panel -->
     <div class="mobile-drawer">
       <div class="drawer-header">
-        <span class="lp-nav-logo" style="font-size: 19px; font-weight: 800; background: linear-gradient(135deg, #fff, var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.02em;">ExamPrep AI</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div class="nav-logo-icon-circle" style="width: 28px; height: 28px;">
+            <svg class="nav-logo-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/><path d="M21.5 12v6"/></svg>
+          </div>
+          <span class="lp-nav-logo" style="font-size: 17px; font-weight: 800; background: linear-gradient(135deg, #fff, var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.02em;">ExamPrep AI</span>
+        </div>
         <button class="drawer-close-btn" onclick="toggleMobileMenu()">×</button>
       </div>
       <nav class="drawer-links">

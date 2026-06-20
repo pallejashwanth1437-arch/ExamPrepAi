@@ -22,6 +22,8 @@ const PORT = process.env.PORT || 3000;
 // Setup Middleware
 app.use(cors());
 app.use(express.json());
+// Serve landing-page built assets (React App)
+app.use(express.static(path.join(__dirname, 'landing-page/dist')));
 // Serve frontend static assets from root of /
 app.use(express.static(path.join(__dirname, 'frontend')));
 

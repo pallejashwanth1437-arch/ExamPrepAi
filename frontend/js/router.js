@@ -21,13 +21,20 @@ export function render() {
   const { currentPage } = state;
 
   if (currentPage === 'login') {
+    document.body.classList.add('auth-theme');
+    document.body.classList.remove('app-theme');
     root.innerHTML = renderLogin();
     return;
   }
   if (currentPage === 'signup') {
+    document.body.classList.add('auth-theme');
+    document.body.classList.remove('app-theme');
     root.innerHTML = renderSignup();
     return;
   }
+  
+  document.body.classList.add('app-theme');
+  document.body.classList.remove('auth-theme');
 
   // Render App layout with horizontal header topbar navigation
   root.innerHTML = `
