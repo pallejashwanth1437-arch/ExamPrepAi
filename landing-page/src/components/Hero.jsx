@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { ArrowRight, Check, Play, Sparkles } from "lucide-react";
+import { ArrowRight, Check, Sparkles } from "lucide-react";
 import FeaturePills from "./FeaturePills";
 import StatsCards from "./StatsCards";
 
-const Hero = ({ setActiveModal, onScrollTo }) => {
+const Hero = ({ onScrollTo }) => {
   const [formState, setFormState] = useState("button"); // "button" | "form" | "success"
   const [email, setEmail] = useState("");
   const [placeholderText, setPlaceholderText] = useState("");
@@ -121,7 +121,7 @@ const Hero = ({ setActiveModal, onScrollTo }) => {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
-                className="flex flex-col sm:flex-row items-center gap-4 justify-center"
+                className="flex items-center justify-center"
               >
                 {/* Primary CTA button */}
                 <button
@@ -130,16 +130,6 @@ const Hero = ({ setActiveModal, onScrollTo }) => {
                   className="px-8 py-3 text-[14px] font-semibold text-black bg-white rounded-full hover:bg-white/95 hover:scale-103 shadow-[0_0_20px_rgba(255,255,255,0.15)] transition-all duration-300 cursor-pointer"
                 >
                   Start Studying Free
-                </button>
-
-                {/* Secondary CTA button */}
-                <button
-                  id="hero-watch-demo-btn"
-                  onClick={() => setActiveModal("demo")}
-                  className="px-8 py-3 text-[14px] font-semibold text-white/90 bg-white/[0.04] border border-white/10 rounded-full hover:bg-white/[0.08] hover:border-white/20 transition-all duration-300 flex items-center gap-2 cursor-pointer backdrop-blur-md"
-                >
-                  <Play className="w-3.5 h-3.5 fill-current text-white/80" />
-                  <span>Watch Demo</span>
                 </button>
               </motion.div>
             ) : (
